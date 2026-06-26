@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Almeida e Mota - Biblioteca</title>
+    <style>
+        /* Paleta de cores baseada na identidade visual enviada */
+        :root {
+            --am-brown-bg: #613C25;      /* Fundo principal do logo */
+            --am-brown-dark: #4A2B18;    /* Tons mais escuros */
+            --am-text-gold: #D6BBA0;     /* Cor da fonte do logo */
+            --cream-bg: #F9F6F0;         /* Fundo da página */
+            --white: #FFFFFF;
+            --text-dark: #2C1E16;
+            --text-light: #7A5C43;
+            --border: #E2D7C8;
+            --danger: #B23B3B;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; }
+        
+        body { background-color: var(--cream-bg); color: var(--text-dark); padding-bottom: 50px; }
+
+        /* Header / Identidade Visual */
+        header {
+            background-color: var(--am-brown-bg);
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .logo-container { text-align: left; }
+        
+        .logo {
+            font-family: 'Arial', sans-serif; 
+            font-size: 28px;
+            font-weight: 300;
+            letter-spacing: 6px;
+            color: var(--am-text-gold);
+            text-transform: uppercase;
+        }
+        
+        .sub-logo {
+            font-size: 12px;
+            letter-spacing: 4px;
+            color: var(--am-text-gold);
+            opacity: 0.8;
+            margin-top: 4px;
+            text-transform: lowercase;
+        }
+
+        .header-actions button {
+            background: transparent;
+            border: 1px solid var(--am-text-gold);
+            color: var(--am-text-gold);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: 0.2s;
+        }
+
+        .header-actions button:hover {
+            background: var(--am-text-gold);
+            color: var(--am-brown-bg);
+        }
+
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+
+        h2 { font-size: 18px; color: var(--am-brown-dark); margin-bottom: 15px; border-bottom: 2px solid var(--border); padding-bottom: 5px; }
+
+        /* Seções (Cards) */
+        .sections-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-bottom: 40px; }
+        
+        .section-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .section-card .letter { font-size: 24px; font-weight: bold; color: var(--am-brown-bg); margin-bottom: 5px; }
+        .section-card .name { font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+        .section-card .location { font-size: 12px; color: var(--text-light); }
+        .btn-delete-section { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; }
+
+        /* NOVA BARRA DE BUSCA */
+        .search-bar { display: flex; gap: 15px; margin-bottom: 15px; }
+        .search-bar input, .search-bar select {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 14px;
+            background: var(--white);
+        }
+        .search-bar input { flex: 2; }
+        .search-bar select { flex: 1; }
+
+        /* Tabela de Livros */
+        table { width: 100%; border-collapse: collapse; background: var(--white); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: var(--am-brown-bg); color: var(--white); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        td { font-size: 14px; }
+        .book-code { font-family: monospace; font-weight: bold; color: var(--am-brown-bg); background: var(--cream-bg); padding: 4px 8px; border-radius: 4px; }
+        
+        .btn-delete { background: #FDE8E8; color: var(--danger); border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-delete:hover { background: #F8D0D0; }
+
+        /* Modais */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; }
+        .modal { background: var(--white); padding: 25px; border-radius: 8px; width: 400px; max-width: 90%; }
+        .modal h3 { margin-bottom: 15px; color: var(--am-brown-dark); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: var(--text-light); }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 14px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-cancel { background: #EEE; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+        .btn-save { background: var(--am-brown-bg); color: var(--white); border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo">ALMEIDA MOTA</div>
+            <div class="sub-logo">advogados</div>
+        </div>
+        <div class="header-actions">
+            <button onclick="openSectionModal()">+ Nova Seção</button>
+            <button onclick="openBookModal()">+ Novo Livro</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Guia de Seções (Localização Física)</h2>
+        <div class="sections-grid" id="sectionsGrid">
+            </div>
+
+        <h2>Acervo de Livros</h2>
+        
+        <div class="search-bar">
+            <input type="text" id="inputBusca" placeholder="Buscar por título, autor ou código..." oninput="render()">
+            <select id="selectFiltroSecao" onchange="render()">
+                <option value="">Todas as Seções</option>
+            </select>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Título</th>
+                    <th>Autor</th>
+                    <th>Seção / Local</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="booksTableBody">
+                </tbody>
+        </table>
+    </div>
+
+    <div class="modal-overlay" id="modalSection">
+        <div class="modal">
+            <h3>Adicionar Nova Seção</h3>
+            <div class="form-group">
+                <label>Letra da Seção (Ex: A, B, C)</label>
+                <input type="text" id="secLetter" maxlength="3" style="text-transform: uppercase;">
+            </div>
+            <div class="form-group">
+                <label>Nome do Assunto (Ex: Direito Civil)</label>
+                <input type="text" id="secName">
+            </div>
+            <div class="form-group">
+                <label>Localização Física (Ex: Estante 1, Prateleira 2)</label>
+                <input type="text" id="secLocation">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModals()">Cancelar</button>
+                <button class="btn-save" onclick="saveSection()">Salvar Seção</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalBook">
+        <div class="modal">
+            <h3>Adicionar Novo Livro</h3>
+            <div class="form-group">
+                <label>Seção do Livro</label>
+                <select id="bookSection"></select>
+            </div>
+            <div class="form-group">
+                <label>Título do Livro</label>
+                <input type="text" id="bookTitle">
+            </div>
+            <div class="form-group">
+                <label>Autor</label>
+                <input type="text" id="bookAuthor">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModals()">Cancelar</button>
+                <button class="btn-save" onclick="saveBook()">Salvar Livro</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inicialização de dados usando o armazenamento do navegador (localStorage)
+        let sections = JSON.parse(localStorage.getItem('almeidaMota_sections')) || [
+            { id: 'A', name: 'Direito Civil', location: 'Estante Principal, Prat. 1' },
+            { id: 'B', name: 'Direito Penal', location: 'Estante Principal, Prat. 2' }
+        ];
+
+        let books = JSON.parse(localStorage.getItem('almeidaMota_books')) || [
+            { id: 1, code: 'A.001', title: 'Curso de Direito Civil', author: 'Flávio Tartuce', sectionId: 'A' },
+            { id: 2, code: 'B.001', title: 'Direito Penal Esquematizado', author: 'Cleber Masson', sectionId: 'B' }
+        ];
+
+        // Função para salvar no navegador
+        function saveData() {
+            localStorage.setItem('almeidaMota_sections', JSON.stringify(sections));
+            localStorage.setItem('almeidaMota_books', JSON.stringify(books));
+            render();
+        }
+
+        // Renderizar a tela
+        function render() {
+            // Renderiza Seções
+            const grid = document.getElementById('sectionsGrid');
+            grid.innerHTML = sections.map(s => `
+                <div class="section-card">
+                    <button class="btn-delete-section" onclick="deleteSection('${s.id}')" title="Excluir Seção">✕</button>
+                    <div class="letter">Seção ${s.id}</div>
+                    <div class="name">${s.name}</div>
+                    <div class="location">📍 ${s.location}</div>
+                </div>
+            `).join('');
+
+            // Atualiza o select do Modal de Livros
+            const select = document.getElementById('bookSection');
+            select.innerHTML = sections.map(s => `<option value="${s.id}">${s.id} - ${s.name}</option>`).join('');
+
+            // Atualiza o Select do Filtro na tela principal (sem perder a seleção atual)
+            const selectFiltro = document.getElementById('selectFiltroSecao');
+            const valorAtualFiltro = selectFiltro.value;
+            selectFiltro.innerHTML = '<option value="">Todas as Seções</option>' + 
+                                     sections.map(s => `<option value="${s.id}">${s.id} - ${s.name}</option>`).join('');
+            selectFiltro.value = valorAtualFiltro; // restaura o valor após recriar os options
+
+            // LÓGICA DE FILTRAGEM
+            const textoBusca = document.getElementById('inputBusca').value.toLowerCase().trim();
+            const secaoBusca = selectFiltro.value;
+
+            const livrosFiltrados = books.filter(b => {
+                const confereTexto = b.title.toLowerCase().includes(textoBusca) || 
+                                     b.author.toLowerCase().includes(textoBusca) || 
+                                     b.code.toLowerCase().includes(textoBusca);
+                const confereSecao = secaoBusca === "" || b.sectionId === secaoBusca;
+                
+                return confereTexto && confereSecao;
+            });
+
+            // Renderiza Livros Filtrados
+            const table = document.getElementById('booksTableBody');
+            if (livrosFiltrados.length === 0) {
+                table.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #7A5C43;">Nenhum livro encontrado na busca.</td></tr>`;
+            } else {
+                table.innerHTML = livrosFiltrados.sort((a,b) => a.code.localeCompare(b.code)).map(b => {
+                    const sec = sections.find(s => s.id === b.sectionId) || { name: 'Desconhecida', location: '?' };
+                    return `
+                        <tr>
+                            <td><span class="book-code">${b.code}</span></td>
+                            <td><strong>${b.title}</strong></td>
+                            <td>${b.author}</td>
+                            <td>${sec.name} <br><small style="color: #7A5C43;">${sec.location}</small></td>
+                            <td><button class="btn-delete" onclick="deleteBook(${b.id})">Excluir</button></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Lógica de exclusão e adição
+        function deleteSection(id) {
+            const hasBooks = books.some(b => b.sectionId === id);
+            if (hasBooks) {
+                alert("Não é possível excluir esta seção pois existem livros cadastrados nela. Remova os livros primeiro.");
+                return;
+            }
+            if (confirm(`Tem certeza que deseja excluir a seção ${id}?`)) {
+                sections = sections.filter(s => s.id !== id);
+                saveData();
+            }
+        }
+
+        function deleteBook(id) {
+            if (confirm("Tem certeza que deseja remover este livro do acervo?")) {
+                books = books.filter(b => b.id !== id);
+                saveData();
+            }
+        }
+
+        function saveSection() {
+            const letter = document.getElementById('secLetter').value.toUpperCase().trim();
+            const name = document.getElementById('secName').value.trim();
+            const location = document.getElementById('secLocation').value.trim();
+
+            if (!letter || !name) return alert("Preencha a Letra e o Nome da seção.");
+            if (sections.find(s => s.id === letter)) return alert("Já existe uma seção com esta letra!");
+
+            sections.push({ id: letter, name, location });
+            saveData();
+            closeModals();
+        }
+
+        function saveBook() {
+            const sectionId = document.getElementById('bookSection').value;
+            const title = document.getElementById('bookTitle').value.trim();
+            const author = document.getElementById('bookAuthor').value.trim();
+
+            if (!sectionId || !title) return alert("Preencha a Seção e o Título do livro.");
+
+            // Gerador automático de código (Ex: A.001, A.002)
+            const booksInSection = books.filter(b => b.sectionId === sectionId);
+            const nums = booksInSection.map(b => parseInt(b.code.split('.')[1]) || 0);
+            const nextNum = nums.length > 0 ? Math.max(...nums) + 1 : 1;
+            const code = `${sectionId}.${String(nextNum).padStart(3, '0')}`;
+
+            books.push({ id: Date.now(), code, title, author, sectionId });
+            saveData();
+            closeModals();
+        }
+
+        // Controle de Modais
+        function openSectionModal() {
+            document.getElementById('secLetter').value = '';
+            document.getElementById('secName').value = '';
+            document.getElementById('secLocation').value = '';
+            document.getElementById('modalSection').style.display = 'flex';
+        }
+
+        function openBookModal() {
+            if (sections.length === 0) return alert("Crie pelo menos uma seção primeiro!");
+            document.getElementById('bookTitle').value = '';
+            document.getElementById('bookAuthor').value = '';
+            document.getElementById('modalBook').style.display = 'flex';
+        }
+
+        function closeModals() {
+            document.getElementById('modalSection').style.display = 'none';
+            document.getElementById('modalBook').style.display = 'none';
+        }
+
+        // Iniciar
+        render();
+    </script>
+</body>
+</html>
